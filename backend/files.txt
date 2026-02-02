@@ -1,0 +1,20 @@
+ Volume in drive C has no label.
+ Volume Serial Number is BE3A-BB0D
+
+ Directory of C:\Users\pc\Desktop\My_Space\CODING\Programming\100_PROJECTS\06_DrishtiAI\backend
+
+02/01/2026  03:38 PM    <DIR>          .
+02/01/2026  01:47 PM    <DIR>          ..
+02/01/2026  01:34 PM               138 .env
+02/01/2026  01:34 PM               138 .env.example
+02/01/2026  01:33 PM               311 config.py
+02/01/2026  03:36 PM               746 debug_imports.py
+02/01/2026  03:38 PM                 0 files.txt
+02/01/2026  03:36 PM             6,554 main.py
+02/01/2026  01:35 PM               224 requirements.txt
+02/01/2026  03:38 PM               573 run_server.py
+02/01/2026  03:36 PM    <DIR>          services
+02/01/2026  01:35 PM    <DIR>          venv
+02/01/2026  03:36 PM    <DIR>          __pycache__
+               8 File(s)          8,684 bytes
+               5 Dir(s)  294,315,274,240 bytes free

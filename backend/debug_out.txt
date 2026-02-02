@@ -1,0 +1,11 @@
+Python Executable: C:\Users\pc\Desktop\My_Space\CODING\Programming\100_PROJECTS\06_DrishtiAI\backend\venv\Scripts\python.exe
+Path: ['C:\\Users\\pc\\Desktop\\My_Space\\CODING\\Programming\\100_PROJECTS\\06_DrishtiAI\\backend', 'C:\\Program Files\\Python313\\python313.zip', 'C:\\Program Files\\Python313\\DLLs', 'C:\\Program Files\\Python313\\Lib', 'C:\\Program Files\\Python313', 'C:\\Users\\pc\\Desktop\\My_Space\\CODING\\Programming\\100_PROJECTS\\06_DrishtiAI\\backend\\venv', 'C:\\Users\\pc\\Desktop\\My_Space\\CODING\\Programming\\100_PROJECTS\\06_DrishtiAI\\backend\\venv\\Lib\\site-packages']
+Attempting: import langchain
+Success. Version: 1.2.7
+Location: C:\Users\pc\Desktop\My_Space\CODING\Programming\100_PROJECTS\06_DrishtiAI\backend\venv\Lib\site-packages\langchain\__init__.py
+Attempting: from langchain.text_splitter import RecursiveCharacterTextSplitter
+Failed old import path: No module named 'langchain.text_splitter'
+Attempting: from langchain_text_splitters import RecursiveCharacterTextSplitter
+Success with new path.
+Attempting to import services.chunker
+Failed importing chunker: No module named 'langchain.text_splitter'

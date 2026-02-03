@@ -1,18 +1,298 @@
 import { useState } from 'react';
-import { Brain, Eye, EyeOff, ArrowRight, Sparkles } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 
+// ──────────────────────────────────────────────
+// EYE ICON (password toggle)
+// ──────────────────────────────────────────────
+function EyeIcon({ open }) {
+    return open ? (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+            <circle cx="12" cy="12" r="3" />
+        </svg>
+    ) : (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94" />
+            <path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19" />
+            <line x1="1" y1="1" x2="23" y2="23" />
+        </svg>
+    );
+}
+
+// ──────────────────────────────────────────────
+// INPUT COMPONENT (moved outside)
+// ──────────────────────────────────────────────
+const Input = ({ placeholder, value, onChange, type = "text", showToggle, toggleState, onToggle, half = false }) => {
+    const [focused, setFocused] = useState(false);
+    return (
+        <div style={{
+            position: "relative",
+            width: half ? "calc(50% - 6px)" : "100%",
+            flexShrink: half ? 0 : undefined,
+        }}>
+            <input
+                type={type}
+                value={value}
+                onChange={onChange}
+                placeholder={placeholder}
+                onFocus={() => setFocused(true)}
+                onBlur={() => setFocused(false)}
+                style={{
+                    width: "100%",
+                    background: "rgba(255,255,255,0.06)",
+                    border: `1px solid ${focused ? "rgba(139,92,246,0.55)" : "rgba(255,255,255,0.1)"}`,
+                    borderRadius: "10px",
+                    padding: "13px 16px",
+                    paddingRight: showToggle ? "42px" : "16px",
+                    color: "#ffffff",
+                    fontSize: "14px",
+                    fontFamily: "inherit",
+                    outline: "none",
+                    boxSizing: "border-box",
+                    transition: "border-color 200ms ease, box-shadow 200ms ease",
+                    boxShadow: focused ? "0 0 0 3px rgba(139,92,246,0.12)" : "none",
+                }}
+            />
+            {showToggle && (
+                <button
+                    type="button"
+                    onClick={onToggle}
+                    style={{
+                        position: "absolute",
+                        right: "12px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        padding: "2px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        transition: "opacity 200ms",
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.opacity = "0.7"}
+                    onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+                >
+                    <EyeIcon open={toggleState} />
+                </button>
+            )}
+        </div>
+    );
+};
+
+// ──────────────────────────────────────────────
+// SLIDE TOGGLE (moved outside)
+// ──────────────────────────────────────────────
+const SlideToggle = ({ mode, setMode, setShowPassword }) => {
+    const signupActive = mode === "signup";
+    return (
+        <div style={{
+            display: "flex",
+            background: "rgba(255,255,255,0.06)",
+            borderRadius: "10px",
+            padding: "4px",
+            position: "relative",
+            marginBottom: "32px",
+            border: "1px solid rgba(255,255,255,0.08)",
+        }}>
+            {/* Sliding background pill */}
+            <div style={{
+                position: "absolute",
+                top: "4px",
+                left: signupActive ? "4px" : "calc(50%)",
+                width: "calc(50% - 4px)",
+                height: "calc(100% - 8px)",
+                background: "rgba(139,92,246,0.25)",
+                borderRadius: "7px",
+                transition: "left 300ms cubic-bezier(0.4, 0, 0.2, 1)",
+                zIndex: 0,
+            }} />
+
+            {/* Buttons */}
+            {["signup", "login"].map((m) => (
+                <button
+                    key={m}
+                    type="button"
+                    onClick={() => { setMode(m); setShowPassword(false); }}
+                    style={{
+                        position: "relative",
+                        zIndex: 1,
+                        flex: 1,
+                        background: "transparent",
+                        border: "none",
+                        borderRadius: "7px",
+                        padding: "9px 0",
+                        cursor: "pointer",
+                        color: mode === m ? "#ffffff" : "rgba(255,255,255,0.42)",
+                        fontSize: "13.5px",
+                        fontWeight: mode === m ? 600 : 500,
+                        fontFamily: "inherit",
+                        transition: "color 300ms ease",
+                        textTransform: "capitalize",
+                    }}
+                >
+                    {m === "signup" ? "Sign Up" : "Log In"}
+                </button>
+            ))}
+        </div>
+    );
+};
+
+// ──────────────────────────────────────────────
+// SIGNUP FORM (moved outside)
+// ──────────────────────────────────────────────
+const SignupForm = ({ formData, handleChange, showPassword, setShowPassword, termsChecked, setTermsChecked, loading }) => (
+    <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+        {/* Username + Email row */}
+        <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+            <Input placeholder="Username" value={formData.username} onChange={handleChange("username")} half />
+            <Input placeholder="Email" value={formData.email} onChange={handleChange("email")} type="email" half />
+        </div>
+        <Input
+            placeholder="Enter your password"
+            value={formData.password}
+            onChange={handleChange("password")}
+            type={showPassword ? "text" : "password"}
+            showToggle
+            toggleState={showPassword}
+            onToggle={() => setShowPassword(!showPassword)}
+        />
+
+        {/* Terms checkbox */}
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "2px" }}>
+            <div
+                onClick={() => setTermsChecked(!termsChecked)}
+                style={{
+                    width: "20px",
+                    height: "20px",
+                    minWidth: "20px",
+                    borderRadius: "5px",
+                    background: termsChecked ? "#7c3aed" : "rgba(255,255,255,0.06)",
+                    border: termsChecked ? "none" : "1px solid rgba(255,255,255,0.2)",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    transition: "all 200ms ease",
+                }}
+            >
+                {termsChecked && (
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="2 6 5 9 10 3" />
+                    </svg>
+                )}
+            </div>
+            <span style={{ color: "rgba(255,255,255,0.45)", fontSize: "13px", lineHeight: 1.4 }}>
+                I agree to the{" "}
+                <a href="#" style={{ color: "#7c3aed", textDecoration: "none", fontWeight: 500, transition: "color 200ms" }}
+                    onMouseEnter={e => e.target.style.color = "#a78bfa"}
+                    onMouseLeave={e => e.target.style.color = "#7c3aed"}
+                >
+                    Terms &amp; Conditions
+                </a>
+            </span>
+        </div>
+
+        {/* CTA */}
+        <button
+            type="submit"
+            disabled={loading}
+            style={{
+                marginTop: "8px",
+                width: "100%",
+                background: "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)",
+                border: "none",
+                borderRadius: "10px",
+                color: "#ffffff",
+                fontSize: "15px",
+                fontWeight: 600,
+                padding: "13px 0",
+                cursor: loading ? "not-allowed" : "pointer",
+                fontFamily: "inherit",
+                transition: "all 200ms ease",
+                boxShadow: "0 4px 14px rgba(124,58,237,0.3)",
+                opacity: loading ? 0.7 : 1,
+            }}
+            onMouseEnter={e => { if (!loading) { e.currentTarget.style.background = "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)"; e.currentTarget.style.boxShadow = "0 4px 20px rgba(124,58,237,0.45)"; } }}
+            onMouseLeave={e => { if (!loading) { e.currentTarget.style.background = "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)"; e.currentTarget.style.boxShadow = "0 4px 14px rgba(124,58,237,0.3)"; } }}
+        >
+            {loading ? "Creating..." : "Create account"}
+        </button>
+    </div>
+);
+
+// ──────────────────────────────────────────────
+// LOGIN FORM (moved outside)
+// ──────────────────────────────────────────────
+const LoginForm = ({ formData, handleChange, showPassword, setShowPassword, loading }) => (
+    <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+        <Input placeholder="Email" value={formData.email} onChange={handleChange("email")} type="email" />
+        <Input
+            placeholder="Enter your password"
+            value={formData.password}
+            onChange={handleChange("password")}
+            type={showPassword ? "text" : "password"}
+            showToggle
+            toggleState={showPassword}
+            onToggle={() => setShowPassword(!showPassword)}
+        />
+
+        {/* Forgot password */}
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "-6px" }}>
+            <a href="#" style={{ color: "rgba(255,255,255,0.38)", fontSize: "12.5px", textDecoration: "none", transition: "color 200ms" }}
+                onMouseEnter={e => e.target.style.color = "#a78bfa"}
+                onMouseLeave={e => e.target.style.color = "rgba(255,255,255,0.38)"}
+            >
+                Forgot password?
+            </a>
+        </div>
+
+        {/* CTA */}
+        <button
+            type="submit"
+            disabled={loading}
+            style={{
+                marginTop: "4px",
+                width: "100%",
+                background: "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)",
+                border: "none",
+                borderRadius: "10px",
+                color: "#ffffff",
+                fontSize: "15px",
+                fontWeight: 600,
+                padding: "13px 0",
+                cursor: loading ? "not-allowed" : "pointer",
+                fontFamily: "inherit",
+                transition: "all 200ms ease",
+                boxShadow: "0 4px 14px rgba(124,58,237,0.3)",
+                opacity: loading ? 0.7 : 1,
+            }}
+            onMouseEnter={e => { if (!loading) { e.currentTarget.style.background = "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)"; e.currentTarget.style.boxShadow = "0 4px 20px rgba(124,58,237,0.45)"; } }}
+            onMouseLeave={e => { if (!loading) { e.currentTarget.style.background = "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)"; e.currentTarget.style.boxShadow = "0 4px 14px rgba(124,58,237,0.3)"; } }}
+        >
+            {loading ? "Logging in..." : "Log in"}
+        </button>
+    </div>
+);
+
+// ──────────────────────────────────────────────
+// MAIN AUTH PAGE
+// ──────────────────────────────────────────────
 export default function AuthPage({ onAuthSuccess }) {
+    // ═══ STATE ═══
     const [mode, setMode] = useState('login');
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-
     const [formData, setFormData] = useState({
         email: '',
         password: '',
         username: '',
     });
+    const [termsChecked, setTermsChecked] = useState(true);
 
+    // ═══ HANDLERS ═══
     const handleChange = (field) => (e) => {
         setFormData({ ...formData, [field]: e.target.value });
         setError(null);
@@ -37,220 +317,243 @@ export default function AuthPage({ onAuthSuccess }) {
         }, 1000);
     };
 
-    const isLogin = mode === 'login';
-
+    // ── RENDER ──
     return (
-        <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
-            {/* Animated grid background */}
-            <div className="fixed inset-0 z-0">
-                <div
-                    className="absolute inset-0"
-                    style={{
-                        backgroundImage: `
-              linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px)
-            `,
-                        backgroundSize: '50px 50px',
-                        animation: 'gridMove 20s linear infinite',
-                    }}
-                />
-            </div>
+        <div style={{
+            display: "flex",
+            height: "100vh",
+            background: "#1a1625",
+            fontFamily: "'Segoe UI', system-ui, sans-serif",
+            overflow: "hidden",
+        }}>
 
-            {/* Floating orbs */}
-            <div className="fixed top-20 left-10 w-72 h-72 bg-electric-blue rounded-full filter blur-[120px] opacity-20 animate-pulse" />
-            <div className="fixed bottom-20 right-10 w-80 h-80 bg-neon-magenta rounded-full filter blur-[120px] opacity-15 animate-pulse" style={{ animationDelay: '1s' }} />
+            {/* ═══ LEFT PANEL — Image / Atmosphere ═══ */}
+            <div className="left-panel" style={{
+                width: "46%",
+                minWidth: "46%",
+                position: "relative",
+                overflow: "hidden",
+            }}>
+                {/* Deep purple atmospheric gradient */}
+                <div style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: `
+            linear-gradient(
+              180deg,
+              #1a1030 0%,
+              #2d1b4e 15%,
+              #3d2260 28%,
+              #4a2d72 38%,
+              #5c3a8a 48%,
+              #4a3580 55%,
+              #2e2458 65%,
+              #1e1840 75%,
+              #141030 88%,
+              #0f0d22 100%
+            )
+          `,
+                }} />
 
-            {/* Main auth container */}
-            <div className="relative z-10 w-full max-w-md fade-in">
-                {/* Logo header */}
-                <div className="text-center mb-8">
-                    <div className="flex items-center justify-center gap-3 mb-3">
-                        <Brain size={48} className="text-cyan-400" />
-                        <h1 className="text-5xl font-orbitron">DrishtiAI</h1>
-                    </div>
-                    <p className="text-gray-400 flex items-center justify-center gap-2">
-                        <Sparkles size={16} className="text-yellow-400" />
-                        Smart Document Intelligence
-                    </p>
+                {/* Sand-dune silhouette shape */}
+                <svg style={{ position: "absolute", bottom: "28%", left: 0, width: "100%", height: "55%", zIndex: 1 }} viewBox="0 0 500 300" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="duneGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#3b2955" />
+                            <stop offset="60%" stopColor="#221a3a" />
+                            <stop offset="100%" stopColor="#151028" />
+                        </linearGradient>
+                    </defs>
+                    <path d="M0,180 C60,160 120,80 200,100 C260,115 300,60 380,90 C430,105 470,70 500,85 L500,300 L0,300 Z" fill="url(#duneGrad)" />
+                    <path d="M0,200 C80,185 150,140 240,155 C310,165 360,130 420,148 C460,158 490,140 500,145 L500,300 L0,300 Z" fill="#1a1330" opacity="0.7" />
+                </svg>
+
+                {/* Subtle light ray from top */}
+                <div style={{
+                    position: "absolute",
+                    top: "-10%",
+                    left: "30%",
+                    width: "60%",
+                    height: "65%",
+                    background: "radial-gradient(ellipse at 50% 0%, rgba(100,60,180,0.25) 0%, transparent 70%)",
+                    zIndex: 0,
+                    pointerEvents: "none",
+                }} />
+
+                {/* Logo top-left */}
+                <div style={{ position: "absolute", top: "28px", left: "28px", zIndex: 5 }}>
+                    <span style={{ color: "#ffffff", fontSize: "22px", fontWeight: 700, letterSpacing: "-0.02em", fontFamily: "inherit" }}>
+                        DrishtiAI
+                    </span>
                 </div>
 
-                {/* Auth card */}
-                <div className="card">
-                    {/* Mode toggle */}
-                    <div className="flex gap-2 p-1 bg-midnight/60 rounded-lg border border-cyan-400/20 mb-6">
-                        <button
-                            onClick={() => setMode('login')}
-                            className={`
-                flex-1 py-2.5 rounded-md font-semibold text-sm transition-all duration-300
-                ${isLogin
-                                    ? 'bg-gradient-neon text-white shadow-lg shadow-cyan-400/30'
-                                    : 'text-gray-400 hover:text-gray-300'
-                                }
-              `}
-                        >
-                            Log In
-                        </button>
-                        <button
-                            onClick={() => setMode('signup')}
-                            className={`
-                flex-1 py-2.5 rounded-md font-semibold text-sm transition-all duration-300
-                ${!isLogin
-                                    ? 'bg-gradient-neon text-white shadow-lg shadow-cyan-400/30'
-                                    : 'text-gray-400 hover:text-gray-300'
-                                }
-              `}
-                        >
-                            Sign Up
-                        </button>
-                    </div>
+                {/* Back to website pill — top right */}
+                <div style={{ position: "absolute", top: "24px", right: "24px", zIndex: 5 }}>
+                    <a href="#" style={{
+                        display: "inline-flex", alignItems: "center", gap: "6px",
+                        background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)",
+                        borderRadius: "999px", padding: "7px 16px",
+                        color: "rgba(255,255,255,0.8)", fontSize: "13px", fontWeight: 500,
+                        textDecoration: "none", transition: "all 200ms",
+                    }}
+                        onMouseEnter={e => { e.currentTarget.style.background = "rgba(255,255,255,0.16)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.28)"; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,0.1)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)"; }}
+                    >
+                        Back to website
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+                        </svg>
+                    </a>
+                </div>
 
-                    {/* Form */}
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        {!isLogin && (
-                            <div className="slide-up">
-                                <label className="block text-sm font-semibold mb-2 text-cyan-400">
-                                    Username
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.username}
-                                    onChange={handleChange('username')}
-                                    placeholder="Choose a username"
-                                    className="w-full"
-                                    required={!isLogin}
-                                />
-                            </div>
-                        )}
+                {/* Bottom tagline */}
+                <div style={{ position: "absolute", bottom: "60px", left: "32px", zIndex: 5 }}>
+                    <h2 style={{
+                        color: "#ffffff", fontSize: "24px", fontWeight: 600,
+                        lineHeight: 1.35, margin: 0, letterSpacing: "-0.01em",
+                    }}>
+                        Your documents,<br />analyzed instantly.
+                    </h2>
+                </div>
 
-                        <div className={!isLogin ? 'slide-up' : ''} style={{ animationDelay: '0.1s' }}>
-                            <label className="block text-sm font-semibold mb-2 text-cyan-400">
-                                Email
-                            </label>
-                            <input
-                                type="email"
-                                value={formData.email}
-                                onChange={handleChange('email')}
-                                placeholder="your@email.com"
-                                className="w-full"
-                                required
-                            />
-                        </div>
+                {/* Carousel dots */}
+                <div style={{ position: "absolute", bottom: "32px", left: "32px", zIndex: 5, display: "flex", gap: "8px", alignItems: "center" }}>
+                    {[0, 1, 2].map((i) => (
+                        <div key={i} style={{
+                            width: i === 2 ? "24px" : "8px",
+                            height: "8px",
+                            borderRadius: "999px",
+                            background: i === 2 ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.3)",
+                            transition: "all 300ms ease",
+                        }} />
+                    ))}
+                </div>
+            </div>
 
-                        <div className={!isLogin ? 'slide-up' : ''} style={{ animationDelay: '0.2s' }}>
-                            <label className="block text-sm font-semibold mb-2 text-cyan-400">
-                                Password
-                            </label>
-                            <div className="relative">
-                                <input
-                                    type={showPassword ? 'text' : 'password'}
-                                    value={formData.password}
-                                    onChange={handleChange('password')}
-                                    placeholder="••••••••"
-                                    className="w-full pr-12"
-                                    required
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-cyan-400 transition-colors"
-                                >
-                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                </button>
-                            </div>
-                        </div>
+            {/* ═══ RIGHT PANEL — Auth Form ═══ */}
+            <div className="right-panel" style={{
+                flex: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "40px 48px",
+                overflowY: "auto",
+            }}>
+                <div style={{ width: "100%", maxWidth: "400px" }}>
+                    <form onSubmit={handleSubmit}>
+                        {/* Heading */}
+                        <h1 style={{
+                            color: "#ffffff",
+                            fontSize: "32px",
+                            fontWeight: 700,
+                            margin: "0 0 8px",
+                            letterSpacing: "-0.02em",
+                            lineHeight: 1.2,
+                        }}>
+                            {mode === "signup" ? "Create an account" : "Welcome back"}
+                        </h1>
 
-                        {isLogin && (
-                            <div className="flex justify-end">
-                                <a
-                                    href="#"
-                                    className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors"
-                                >
-                                    Forgot password?
-                                </a>
-                            </div>
-                        )}
+                        {/* Sub text */}
+                        <p style={{
+                            color: "rgba(255,255,255,0.4)",
+                            fontSize: "13.5px",
+                            margin: "0 0 28px",
+                            fontWeight: 400,
+                        }}>
+                            {mode === "signup" ? (
+                                <>Already have an account?{" "}
+                                    <a href="#" onClick={(e) => { e.preventDefault(); setMode("login"); }} style={{ color: "#7c3aed", textDecoration: "none", fontWeight: 500, transition: "color 200ms" }}
+                                        onMouseEnter={e => e.target.style.color = "#a78bfa"}
+                                        onMouseLeave={e => e.target.style.color = "#7c3aed"}
+                                    >Log in</a>
+                                </>
+                            ) : (
+                                <>Don't have an account?{" "}
+                                    <a href="#" onClick={(e) => { e.preventDefault(); setMode("signup"); }} style={{ color: "#7c3aed", textDecoration: "none", fontWeight: 500, transition: "color 200ms" }}
+                                        onMouseEnter={e => e.target.style.color = "#a78bfa"}
+                                        onMouseLeave={e => e.target.style.color = "#7c3aed"}
+                                    >Sign up</a>
+                                </>
+                            )}
+                        </p>
 
+                        {/* Slide Toggle */}
+                        <SlideToggle mode={mode} setMode={setMode} setShowPassword={setShowPassword} />
+
+                        {/* Error Display */}
                         {error && (
-                            <div className="p-3 bg-red-500/20 border border-red-500 rounded-lg text-red-300 text-sm">
+                            <div style={{
+                                padding: "12px 16px",
+                                background: "rgba(239, 68, 68, 0.1)",
+                                border: "1px solid rgba(239, 68, 68, 0.3)",
+                                borderRadius: "8px",
+                                color: "#fca5a5",
+                                fontSize: "13px",
+                                marginBottom: "14px",
+                            }}>
                                 {error}
                             </div>
                         )}
 
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="btn btn-primary w-full flex items-center justify-center gap-2 group mt-6"
-                        >
-                            {loading ? (
-                                <div className="loading-small"></div>
+                        {/* Form (animated swap) */}
+                        <div style={{ transition: "opacity 250ms ease", opacity: 1 }}>
+                            {mode === "signup" ? (
+                                <SignupForm
+                                    formData={formData}
+                                    handleChange={handleChange}
+                                    showPassword={showPassword}
+                                    setShowPassword={setShowPassword}
+                                    termsChecked={termsChecked}
+                                    setTermsChecked={setTermsChecked}
+                                    loading={loading}
+                                />
                             ) : (
-                                <>
-                                    {isLogin ? 'Log In' : 'Create Account'}
-                                    <ArrowRight
-                                        size={18}
-                                        className="group-hover:translate-x-1 transition-transform"
-                                    />
-                                </>
+                                <LoginForm
+                                    formData={formData}
+                                    handleChange={handleChange}
+                                    showPassword={showPassword}
+                                    setShowPassword={setShowPassword}
+                                    loading={loading}
+                                />
                             )}
-                        </button>
+                        </div>
                     </form>
-
-                    {/* Footer text */}
-                    <div className="mt-6 text-center text-sm text-gray-500">
-                        {isLogin ? (
-                            <p>
-                                Don't have an account?{' '}
-                                <button
-                                    onClick={() => setMode('signup')}
-                                    className="text-cyan-400 hover:text-cyan-300 font-semibold transition-colors"
-                                >
-                                    Sign up
-                                </button>
-                            </p>
-                        ) : (
-                            <p>
-                                Already have an account?{' '}
-                                <button
-                                    onClick={() => setMode('login')}
-                                    className="text-cyan-400 hover:text-cyan-300 font-semibold transition-colors"
-                                >
-                                    Log in
-                                </button>
-                            </p>
-                        )}
-                    </div>
                 </div>
-
-                {/* Terms footer */}
-                <p className="text-center text-xs text-gray-600 mt-6">
-                    By continuing, you agree to our{' '}
-                    <a href="#" className="text-cyan-400 hover:text-cyan-300">
-                        Terms of Service
-                    </a>{' '}
-                    and{' '}
-                    <a href="#" className="text-cyan-400 hover:text-cyan-300">
-                        Privacy Policy
-                    </a>
-                </p>
             </div>
 
+            {/* ═══ RESPONSIVE ═══ */}
             <style>{`
-        @keyframes gridMove {
-          0% {
-            transform: translateY(0);
+        input::placeholder { color: rgba(255,255,255,0.32) !important; }
+
+        /* Tablet */
+        @media (max-width: 900px) {
+          .left-panel { width: 38% !important; min-width: 38% !important; }
+        }
+
+        /* Mobile: left panel becomes a top strip */
+        @media (max-width: 640px) {
+          .left-panel {
+            width: 100% !important;
+            min-width: 100% !important;
+            height: 200px !important;
+            position: fixed !important;
+            top: 0; left: 0; right: 0;
+            z-index: 0;
           }
-          100% {
-            transform: translateY(50px);
+          .right-panel {
+            position: relative !important;
+            z-index: 1;
+            margin-top: 200px !important;
+            padding: 32px 24px !important;
+            min-height: calc(100vh - 200px) !important;
+            align-items: flex-start !important;
           }
         }
 
-        .loading-small {
-          width: 20px;
-          height: 20px;
-          border: 3px solid rgba(0, 240, 255, 0.3);
-          border-top-color: var(--neon-cyan);
-          border-radius: 50%;
-          animation: spin 0.8s linear infinite;
+        /* Force two-column name row to stack on very small */
+        @media (max-width: 420px) {
+          .left-panel { height: 160px !important; }
+          .right-panel { margin-top: 160px !important; min-height: calc(100vh - 160px) !important; }
         }
       `}</style>
         </div>
